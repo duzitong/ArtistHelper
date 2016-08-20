@@ -1,1 +1,2 @@
-# SavaData
+# ArtistHelper
+# Learning PyQt
