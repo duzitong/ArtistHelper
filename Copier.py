@@ -1,3 +1,3 @@
 class Copier():
-    def copy(self, file, toPc, toIOS, toAndroid):
-        return toPc, toIOS, toAndroid
+    def copy(self, fileName, toPc, toIOS, toAndroid):
+        print fileName

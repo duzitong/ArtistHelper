@@ -1,6 +1,6 @@
 class Checker():
-    def __init__(self, folder = "."):
+    def __init__(self, artlasFolder = "."):
         pass
 
-    def check(self):
-        return "Check"
+    def check(self, fileName):
+        return False, fileName

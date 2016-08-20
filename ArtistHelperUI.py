@@ -9,6 +9,8 @@
 from PyQt4 import QtCore, QtGui
 from Copier import Copier
 from Checker import Checker
+from CheckFailedDialog import *
+from FileNotCheckedDialog import *
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -26,63 +28,60 @@ except AttributeError:
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
+        self.width = 1000
+        self.height = 750
+
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(530, 445)
+        MainWindow.setFixedSize(self.width, self.height)
+        MainWindow.setWindowFlags(QtCore.Qt.WindowMinimizeButtonHint)
 
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
 
         self.treeView = QtGui.QTreeView(self.centralwidget)
-        self.treeView.setGeometry(QtCore.QRect(0, 0, 261, 431))
+        self.treeView.setGeometry(QtCore.QRect(0, 0, self.width * 0.4, self.height))
         self.treeView.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
         self.treeView.setObjectName(_fromUtf8("treeView"))
+        self.fileModel = QtGui.QDirModel()
+        self.treeView.setModel(self.fileModel)
+        self.treeView.setRootIndex(self.fileModel.index(".."))
+        self.treeView.doubleClicked.connect(self.addFile)
 
-        self.tabWidget = QtGui.QTabWidget(self.centralwidget)
-        self.tabWidget.setGeometry(QtCore.QRect(260, 0, 271, 431))
-        self.tabWidget.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
-        self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
-
-
-        self.tab = QtGui.QWidget()
-        self.tab.setObjectName(_fromUtf8("tab"))
-
-        self.pushButton = QtGui.QPushButton(self.tab)
-        self.pushButton.setGeometry(QtCore.QRect(180, 370, 75, 23))
+        self.pushButton = QtGui.QPushButton(self.centralwidget)
+        self.pushButton.setGeometry(QtCore.QRect(self.width * 0.85, self.height * 0.9, 75, 23))
         self.pushButton.setObjectName(_fromUtf8("pushButton"))
-        self.pushButton.clicked.connect(self.OnCheck)
+        self.pushButton.clicked.connect(self.onCheck)
 
-        self.listView_2 = QtGui.QListView(self.tab)
-        self.listView_2.setGeometry(QtCore.QRect(0, 0, 271, 331))
-        self.listView_2.setObjectName(_fromUtf8("listView_2"))
+        self.tableView  = QtGui.QTableView (self.centralwidget)
+        self.tableView.setGeometry(QtCore.QRect(self.width * 0.4, 0, self.width * 0.6, self.height * 0.85))
+        self.tableView.setObjectName(_fromUtf8("tableView"))
+        self.tableModel = QtGui.QStandardItemModel(self.tableView)
+        self.tableModel.setColumnCount(2)
+        self.tableModel.setHeaderData(0, QtCore.Qt.Horizontal,_fromUtf8("Name"))
+        self.tableModel.setHeaderData(1, QtCore.Qt.Horizontal,_fromUtf8("Folder"))
+        self.tableView.setModel(self.tableModel)
+        self.tableView.setColumnWidth(0, self.width * 0.2)
+        self.tableView.setColumnWidth(1, self.width * 0.38)
 
-        self.tabWidget.addTab(self.tab, _fromUtf8(""))
-
-
-        self.tab_2 = QtGui.QWidget()
-        self.tab_2.setObjectName(_fromUtf8("tab_2"))
-
-        self.pushButton_2 = QtGui.QPushButton(self.tab_2)
-        self.pushButton_2.setGeometry(QtCore.QRect(180, 370, 75, 23))
+        self.pushButton_2 = QtGui.QPushButton(self.centralwidget)
+        self.pushButton_2.setGeometry(QtCore.QRect(self.width * 0.85, self.height * 0.95, 75, 23))
         self.pushButton_2.setObjectName(_fromUtf8("pushButton_2"))
-        self.pushButton_2.clicked.connect(self.OnCopy)
+        self.pushButton_2.clicked.connect(self.onCopy)
 
-        self.checkBox = QtGui.QCheckBox(self.tab_2)
-        self.checkBox.setGeometry(QtCore.QRect(10, 340, 71, 16))
+        self.checkBox = QtGui.QCheckBox(self.centralwidget)
+        self.checkBox.setGeometry(QtCore.QRect(self.width * 0.45, self.height * 0.95, 75, 23))
         self.checkBox.setObjectName(_fromUtf8("checkBox"))
+        self.checkBox.setCheckState(QtCore.Qt.Checked)
 
-        self.checkBox_2 = QtGui.QCheckBox(self.tab_2)
-        self.checkBox_2.setGeometry(QtCore.QRect(10, 360, 71, 16))
+        self.checkBox_2 = QtGui.QCheckBox(self.centralwidget)
+        self.checkBox_2.setGeometry(QtCore.QRect(self.width * 0.55, self.height * 0.95, 75, 23))
         self.checkBox_2.setObjectName(_fromUtf8("checkBox_2"))
+        self.checkBox_2.setCheckState(QtCore.Qt.Checked)
 
-        self.checkBox_3 = QtGui.QCheckBox(self.tab_2)
-        self.checkBox_3.setGeometry(QtCore.QRect(10, 380, 71, 16))
+        self.checkBox_3 = QtGui.QCheckBox(self.centralwidget)
+        self.checkBox_3.setGeometry(QtCore.QRect(self.width * 0.65, self.height * 0.95, 75, 23))
         self.checkBox_3.setObjectName(_fromUtf8("checkBox_3"))
-
-        self.listView = QtGui.QListView(self.tab_2)
-        self.listView.setGeometry(QtCore.QRect(0, 0, 271, 331))
-        self.listView.setObjectName(_fromUtf8("listView"))
-
-        self.tabWidget.addTab(self.tab_2, _fromUtf8(""))
+        self.checkBox_3.setCheckState(QtCore.Qt.Checked)
 
 
         self.statusbar = QtGui.QStatusBar(MainWindow)
@@ -90,7 +89,6 @@ class Ui_MainWindow(object):
 
 
         self.retranslateUi(MainWindow)
-        self.tabWidget.setCurrentIndex(0)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
         self.initializeLogicComponents()
@@ -98,23 +96,54 @@ class Ui_MainWindow(object):
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(_translate("MainWindow", "ArtistHelper", None))
         self.pushButton.setText(_translate("MainWindow", "Check", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Checker", None))
         self.pushButton_2.setText(_translate("MainWindow", "Copy", None))
         self.checkBox.setText(_translate("MainWindow", "PC", None))
         self.checkBox_2.setText(_translate("MainWindow", "IOS", None))
         self.checkBox_3.setText(_translate("MainWindow", "Android", None))
-        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Copier", None))
 
-    def OnCheck(self):
-        print self.checker.check()
+    def onCheck(self):
+        self.passed = [False for _ in range(self.tableModel.rowCount())]
+        checked = [False for _ in range(self.tableModel.rowCount())]
+        for cell in self.tableView.selectedIndexes():
+            if not checked[cell.row()]:
+                name = self.tableModel.item(cell.row()).text()
+                path = self.tableModel.item(cell.row(), 1).text()
+                isPassed, errorMessage = self.checker.check(path + "/" + name)
+                if isPassed:
+                    self.passed[cell.row()] = True
+                else:
+                    dialog = CheckFailedDialog(errorMessage)
+                    dialog.exec_()
+                checked[cell.row()] = True
 
-    def OnCopy(self):
-        print self.copier.copy("",
-        self.checkBox.isChecked(),
-        self.checkBox_2.isChecked(),
-        self.checkBox_3.isChecked())
+    def onCopy(self):
+        copied = [False for _ in range(self.tableModel.rowCount())]
+        notPassedFiles = []
+        for cell in self.tableView.selectedIndexes():
+            if not copied[cell.row()]:
+                if cell.row < len(self.passed) and self.passed[cell.row()]:
+                    name = self.tableModel.item(cell.row()).text()
+                    path = self.tableModel.item(cell.row(), 1).text()
+                    self.copier.copy(path + "/" + name,
+                        self.checkBox.isChecked(),
+                        self.checkBox_2.isChecked(),
+                        self.checkBox_3.isChecked())
+                else:
+                    notPassedFiles.append(self.tableModel.item(cell.row()).text())
+                copied[cell.row()] = True
+        if len(notPassedFiles) > 0:
+            dialog = FileNotCheckedDialog(notPassedFiles)
+            dialog.exec_()
+
+    def addFile(self, index):
+        fileInfo = self.fileModel.fileInfo(index)
+        if fileInfo.isFile():
+            path = fileInfo.dir().path()
+            name = fileInfo.fileName()
+            # TODO: if name.endswith("json")
+            self.tableModel.appendRow([QtGui.QStandardItem(name), QtGui.QStandardItem(path)])
 
     def initializeLogicComponents(self):
         self.copier = Copier()
         self.checker = Checker()
-
+        self.passed = []
