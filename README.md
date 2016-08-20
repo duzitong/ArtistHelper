@@ -1,2 +1,2 @@
-# ArtistHelper
-# Learning PyQt
+ArtistHelper
+### Learning PyQt
