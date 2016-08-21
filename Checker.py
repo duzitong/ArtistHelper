@@ -1,7 +1,7 @@
 import os, time
 
 class Checker():
-    def __init__(self, artlasPath = "."):
+    def __init__(self, atlasPath = "."):
         pass
 
     def check(self, fileName):

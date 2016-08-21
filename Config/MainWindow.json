@@ -2,7 +2,7 @@
     "Width": 1000,
     "Height": 750,
     "RootPath": "..",
-    "ArtlasPath": ".",
+    "AtlasPath": ".",
     "PC": true,
     "IOS": true,
     "Android": false

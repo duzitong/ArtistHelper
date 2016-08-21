@@ -158,5 +158,5 @@ class Ui_MainWindow(object):
 
     def initializeLogicComponents(self):
         self.copier = Copier()
-        self.checker = Checker(self.config["ArtlasPath"])
+        self.checker = Checker(self.config["AtlasPath"])
         self.passed = []
