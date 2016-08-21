@@ -11,6 +11,7 @@ from Copier import Copier
 from Checker import Checker
 from CheckFailedDialog import *
 from FileNotCheckedDialog import *
+import json
 
 try:
     _fromUtf8 = QtCore.QString.fromUtf8
@@ -28,8 +29,9 @@ except AttributeError:
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
-        self.width = 1000
-        self.height = 750
+        self.config = json.load(file("Config/MainWindow.json"))
+        self.width = self.config["Width"]
+        self.height = self.config["Height"]
 
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
         MainWindow.setFixedSize(self.width, self.height)
@@ -44,7 +46,7 @@ class Ui_MainWindow(object):
         self.treeView.setObjectName(_fromUtf8("treeView"))
         self.fileModel = QtGui.QDirModel()
         self.treeView.setModel(self.fileModel)
-        self.treeView.setRootIndex(self.fileModel.index(".."))
+        self.treeView.setRootIndex(self.fileModel.index(self.config["RootPath"]))
         self.treeView.doubleClicked.connect(self.addFile)
 
         self.pushButton = QtGui.QPushButton(self.centralwidget)
@@ -56,12 +58,14 @@ class Ui_MainWindow(object):
         self.tableView.setGeometry(QtCore.QRect(self.width * 0.4, 0, self.width * 0.6, self.height * 0.85))
         self.tableView.setObjectName(_fromUtf8("tableView"))
         self.tableModel = QtGui.QStandardItemModel(self.tableView)
-        self.tableModel.setColumnCount(2)
+        self.tableModel.setColumnCount(3)
         self.tableModel.setHeaderData(0, QtCore.Qt.Horizontal,_fromUtf8("Name"))
         self.tableModel.setHeaderData(1, QtCore.Qt.Horizontal,_fromUtf8("Folder"))
+        self.tableModel.setHeaderData(2, QtCore.Qt.Horizontal,_fromUtf8("Modified"))
         self.tableView.setModel(self.tableModel)
         self.tableView.setColumnWidth(0, self.width * 0.2)
-        self.tableView.setColumnWidth(1, self.width * 0.38)
+        self.tableView.setColumnWidth(1, self.width * 0.3)
+        self.tableView.setColumnWidth(2, self.width * 0.08)
 
         self.pushButton_2 = QtGui.QPushButton(self.centralwidget)
         self.pushButton_2.setGeometry(QtCore.QRect(self.width * 0.85, self.height * 0.95, 75, 23))
@@ -71,17 +75,20 @@ class Ui_MainWindow(object):
         self.checkBox = QtGui.QCheckBox(self.centralwidget)
         self.checkBox.setGeometry(QtCore.QRect(self.width * 0.45, self.height * 0.95, 75, 23))
         self.checkBox.setObjectName(_fromUtf8("checkBox"))
-        self.checkBox.setCheckState(QtCore.Qt.Checked)
+        if self.config["PC"]:
+            self.checkBox.setCheckState(QtCore.Qt.Checked)
 
         self.checkBox_2 = QtGui.QCheckBox(self.centralwidget)
         self.checkBox_2.setGeometry(QtCore.QRect(self.width * 0.55, self.height * 0.95, 75, 23))
         self.checkBox_2.setObjectName(_fromUtf8("checkBox_2"))
-        self.checkBox_2.setCheckState(QtCore.Qt.Checked)
+        if self.config["IOS"]:
+            self.checkBox_2.setCheckState(QtCore.Qt.Checked)
 
         self.checkBox_3 = QtGui.QCheckBox(self.centralwidget)
         self.checkBox_3.setGeometry(QtCore.QRect(self.width * 0.65, self.height * 0.95, 75, 23))
         self.checkBox_3.setObjectName(_fromUtf8("checkBox_3"))
-        self.checkBox_3.setCheckState(QtCore.Qt.Checked)
+        if self.config["Android"]:
+            self.checkBox_3.setCheckState(QtCore.Qt.Checked)
 
 
         self.statusbar = QtGui.QStatusBar(MainWindow)
@@ -121,10 +128,13 @@ class Ui_MainWindow(object):
         notPassedFiles = []
         for cell in self.tableView.selectedIndexes():
             if not copied[cell.row()]:
-                if cell.row < len(self.passed) and self.passed[cell.row()]:
-                    name = self.tableModel.item(cell.row()).text()
-                    path = self.tableModel.item(cell.row(), 1).text()
-                    self.copier.copy(path + "/" + name,
+                name = self.tableModel.item(cell.row()).text()
+                path = self.tableModel.item(cell.row(), 1).text()
+                modified = self.tableModel.item(cell.row(), 2).text()
+                fileName = path + "/" + name
+                if cell.row() < len(self.passed) and self.passed[cell.row()] and \
+                self.checker.isLatest(fileName, modified):
+                    self.copier.copy(fileName,
                         self.checkBox.isChecked(),
                         self.checkBox_2.isChecked(),
                         self.checkBox_3.isChecked())
@@ -140,10 +150,13 @@ class Ui_MainWindow(object):
         if fileInfo.isFile():
             path = fileInfo.dir().path()
             name = fileInfo.fileName()
+            modified = fileInfo.lastModified().toString("yyyy/MM/dd hh:mm:ss")
             # TODO: if name.endswith("json")
-            self.tableModel.appendRow([QtGui.QStandardItem(name), QtGui.QStandardItem(path)])
+            self.tableModel.appendRow([QtGui.QStandardItem(name), 
+                                       QtGui.QStandardItem(path),
+                                       QtGui.QStandardItem(modified)])
 
     def initializeLogicComponents(self):
         self.copier = Copier()
-        self.checker = Checker()
+        self.checker = Checker(self.config["ArtlasPath"])
         self.passed = []
