@@ -45,6 +45,7 @@ class Ui_MainWindow(object):
         self.treeView.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedStates))
         self.treeView.setObjectName(_fromUtf8("treeView"))
         self.fileModel = QtGui.QDirModel()
+        self.fileModel.setSorting(QtCore.QDir.DirsFirst)
         self.treeView.setModel(self.fileModel)
         self.treeView.setRootIndex(self.fileModel.index(self.config["RootPath"]))
         self.treeView.doubleClicked.connect(self.addFile)
